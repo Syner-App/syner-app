@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+coverage
+.env*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+*.log
+.git
+.claude
+.agents
+.codegraph
+.DS_Store
