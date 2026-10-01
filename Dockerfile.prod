@@ -16,14 +16,14 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 
-# Build: lint and compile
+# Build: lint, test and compile
 FROM deps AS build
 # NEXT_PUBLIC_* values are inlined into the browser bundle at build time, so they
 # come in as build args (the runtime environment cannot change them)
 ARG NEXT_PUBLIC_GATEWAY_WS_URL=http://localhost:3000
 ENV NEXT_PUBLIC_GATEWAY_WS_URL=${NEXT_PUBLIC_GATEWAY_WS_URL}
 COPY . .
-RUN pnpm lint && pnpm build
+RUN pnpm lint && pnpm test && pnpm build
 
 
 # Runtime (default target)
