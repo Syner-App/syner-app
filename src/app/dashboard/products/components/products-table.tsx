@@ -2,6 +2,7 @@
 
 import { ArrowDownUp, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 
+import { CardField, ResponsiveList, type Column } from "@/components/responsive-list"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,17 +12,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { formatPrice, isLowStock } from "@/app/dashboard/products/utils/format"
 import { CATEGORY_LABELS, type Product } from "@/app/dashboard/products/utils/types"
+
+function StockStatus({ product }: { product: Product }) {
+  if (!product.activo) return <Badge variant="outline">Eliminado</Badge>
+  return isLowStock(product) ? <Badge variant="destructive">Bajo</Badge> : null
+}
+
+function Stock({ product }: { product: Product }) {
+  return (
+    <span className="tabular-nums">
+      {product.stock_actual}
+      <span className="text-muted-foreground"> / mín. {product.stock_minimo}</span>
+    </span>
+  )
+}
 
 export function ProductsTable({
   products,
@@ -38,95 +44,86 @@ export function ProductsTable({
   onStock: (product: Product) => void
   onDelete: (product: Product) => void
 }) {
+  const columns: Column<Product>[] = [
+    {
+      header: "Producto",
+      cell: (product) => (
+        <div className="flex flex-col">
+          <span className="font-medium">{product.nombre}</span>
+          <span className="text-xs text-muted-foreground">{product.codigo_sku}</span>
+        </div>
+      ),
+    },
+    { header: "Categoría", className: "hidden lg:table-cell", cell: (product) => CATEGORY_LABELS[product.categoria] },
+    { header: "Proveedor", cell: (product) => product.proveedor },
+    { header: "Precio", className: "text-right tabular-nums", cell: (product) => formatPrice(product.precio) },
+    {
+      header: "Stock",
+      className: "text-right",
+      cell: (product) => (
+        <div className="flex items-center justify-end gap-2">
+          <StockStatus product={product} />
+          <Stock product={product} />
+        </div>
+      ),
+    },
+  ]
+
   return (
-    <div className="rounded-xl border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Producto</TableHead>
-            <TableHead>Categoría</TableHead>
-            <TableHead>Proveedor</TableHead>
-            <TableHead className="text-right">Precio</TableHead>
-            <TableHead className="text-right">Stock</TableHead>
-            <TableHead className="w-12">
-              <span className="sr-only">Acciones</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading &&
-            Array.from({ length: 5 }, (_, index) => (
-              <TableRow key={index}>
-                <TableCell colSpan={6}>
-                  <Skeleton className="h-6 w-full" />
-                </TableCell>
-              </TableRow>
-            ))}
-          {!isLoading && products?.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                No hay productos con estos filtros.
-              </TableCell>
-            </TableRow>
-          )}
-          {products?.map((product) => (
-            <TableRow key={product.id}>
-              <TableCell>
-                <div className="flex flex-col">
-                  <span className="font-medium">{product.nombre}</span>
-                  <span className="text-xs text-muted-foreground">{product.codigo_sku}</span>
-                </div>
-              </TableCell>
-              <TableCell>{CATEGORY_LABELS[product.categoria]}</TableCell>
-              <TableCell>{product.proveedor}</TableCell>
-              <TableCell className="text-right tabular-nums">{formatPrice(product.precio)}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2 tabular-nums">
-                  {!product.activo ? (
-                    <Badge variant="outline">Eliminado</Badge>
-                  ) : (
-                    isLowStock(product) && <Badge variant="destructive">Bajo</Badge>
-                  )}
-                  <span>
-                    {product.stock_actual}
-                    <span className="text-muted-foreground"> / mín. {product.stock_minimo}</span>
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                {product.activo && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label={`Acciones de ${product.nombre}`}>
-                        <MoreHorizontal />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onStock(product)}>
-                        <ArrowDownUp />
-                        Movimiento de stock
-                      </DropdownMenuItem>
-                      {canManage && (
-                        <>
-                          <DropdownMenuItem onClick={() => onEdit(product)}>
-                            <Pencil />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem variant="destructive" onClick={() => onDelete(product)}>
-                            <Trash2 />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <ResponsiveList
+      items={products}
+      getKey={(product) => product.id}
+      isLoading={isLoading}
+      empty="No hay productos con estos filtros."
+      columns={columns}
+      actions={(product) =>
+        product.activo && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={`Acciones de ${product.nombre}`}>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onStock(product)}>
+                <ArrowDownUp />
+                Movimiento de stock
+              </DropdownMenuItem>
+              {canManage && (
+                <>
+                  <DropdownMenuItem onClick={() => onEdit(product)}>
+                    <Pencil />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={() => onDelete(product)}>
+                    <Trash2 />
+                    Eliminar
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      }
+      renderCard={(product) => (
+        <>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate font-medium">{product.nombre}</span>
+              <span className="text-xs text-muted-foreground">
+                {product.codigo_sku} · {CATEGORY_LABELS[product.categoria]}
+              </span>
+            </div>
+            <StockStatus product={product} />
+          </div>
+          <CardField label="Precio">{formatPrice(product.precio)}</CardField>
+          <CardField label="Stock">
+            <Stock product={product} />
+          </CardField>
+          <CardField label="Proveedor">{product.proveedor}</CardField>
+        </>
+      )}
+    />
   )
 }

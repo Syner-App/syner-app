@@ -43,7 +43,7 @@ export function OrganizationMembersSheet({
 
   return (
     <Sheet open={organization !== undefined} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full data-[side=right]:sm:max-w-2xl">
+      <SheetContent className="w-full data-[side=right]:max-w-full data-[side=right]:sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle>Miembros de {organization?.name}</SheetTitle>
           <SheetDescription>Agrega al propietario y a los primeros miembros de la organización.</SheetDescription>

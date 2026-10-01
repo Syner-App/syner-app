@@ -14,9 +14,9 @@ export function NumberInput({
 }) {
   return (
     <Input
+      inputMode="numeric"
       {...props}
       type="number"
-      inputMode="numeric"
       value={value === undefined || Number.isNaN(value) ? "" : value}
       onChange={(event) => onChange(event.target.value === "" ? NaN : event.target.valueAsNumber)}
     />

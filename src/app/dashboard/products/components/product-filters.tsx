@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react"
 
+import { FiltersBar } from "@/components/filters-bar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,6 +25,7 @@ export interface FilterValues {
 
 const ALL = "all"
 
+// The name search stays visible on phones; the other filters open in a sheet
 export function ProductFilters({
   value,
   onChange,
@@ -31,22 +33,30 @@ export function ProductFilters({
   value: FilterValues
   onChange: (value: FilterValues) => void
 }) {
+  const activeCount =
+    (value.proveedor ? 1 : 0) + (value.categoria ? 1 : 0) + (value.stock_bajo ? 1 : 0) + (value.inactivos ? 1 : 0)
+
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <div className="relative w-full sm:w-64">
-        <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          aria-label="Buscar por nombre"
-          placeholder="Buscar por nombre"
-          className="pl-8"
-          value={value.nombre}
-          onChange={(event) => onChange({ ...value, nombre: event.target.value })}
-        />
-      </div>
+    <FiltersBar
+      activeCount={activeCount}
+      primary={
+        <div className="relative w-full md:w-64">
+          <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            aria-label="Buscar por nombre"
+            placeholder="Buscar por nombre"
+            className="pl-8"
+            value={value.nombre}
+            onChange={(event) => onChange({ ...value, nombre: event.target.value })}
+          />
+        </div>
+      }
+    >
       <Input
         aria-label="Proveedor"
         placeholder="Proveedor"
-        className="w-full sm:w-48"
+        className="md:w-48"
         value={value.proveedor}
         onChange={(event) => onChange({ ...value, proveedor: event.target.value })}
       />
@@ -56,7 +66,7 @@ export function ProductFilters({
           onChange({ ...value, categoria: categoria === ALL ? undefined : (categoria as Category) })
         }
       >
-        <SelectTrigger aria-label="Categoría" className="w-full sm:w-44">
+        <SelectTrigger aria-label="Categoría" className="md:w-44">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -82,6 +92,6 @@ export function ProductFilters({
         />
         Ver eliminados
       </Label>
-    </div>
+    </FiltersBar>
   )
 }

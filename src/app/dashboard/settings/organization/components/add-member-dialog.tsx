@@ -6,13 +6,13 @@ import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/responsive-dialog"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -63,15 +63,15 @@ export function AddMemberDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent>
         <form noValidate onSubmit={form.handleSubmit(submit)} className="flex flex-col gap-6">
-          <DialogHeader>
-            <DialogTitle>Agregar miembro</DialogTitle>
-            <DialogDescription>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Agregar miembro</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
               Si el correo ya tiene cuenta, solo se agrega a la organización.
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           <FieldGroup>
             <Controller
               name="email"
@@ -139,7 +139,7 @@ export function AddMemberDialog({
             />
           </FieldGroup>
           {Boolean(error) && <FieldError>{errorMessage(error)}</FieldError>}
-          <DialogFooter>
+          <ResponsiveDialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
@@ -147,9 +147,9 @@ export function AddMemberDialog({
               {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
               Agregar
             </Button>
-          </DialogFooter>
+          </ResponsiveDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }

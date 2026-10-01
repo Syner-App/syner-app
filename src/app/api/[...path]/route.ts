@@ -13,4 +13,4 @@ async function forward(request: NextRequest, ctx: RouteContext<"/api/[...path]">
   return toResponse(result)
 }
 
-export { forward as GET, forward as POST, forward as PATCH, forward as DELETE }
+export { forward as GET, forward as POST, forward as PUT, forward as PATCH, forward as DELETE }

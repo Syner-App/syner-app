@@ -13,8 +13,8 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
+        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 bg-background/95 backdrop-blur transition-[width,height] ease-linear supports-backdrop-filter:bg-background/80 md:static md:h-16 md:bg-background md:backdrop-blur-none group-has-data-[collapsible=icon]/sidebar-wrapper:md:h-12">
+          <div className="flex min-w-0 items-center gap-2 px-3 sm:px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
@@ -22,11 +22,11 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
             />
             <DashboardBreadcrumb />
           </div>
-          <div className="ml-auto px-4">
+          <div className="ml-auto px-3 sm:px-4">
             <ModeToggle />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col gap-4 p-3 pt-1 pb-8 sm:p-4 sm:pt-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

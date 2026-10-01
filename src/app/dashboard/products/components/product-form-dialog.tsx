@@ -7,13 +7,13 @@ import { Controller, useForm } from "react-hook-form"
 import { NumberInput } from "@/components/number-input"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/responsive-dialog"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
@@ -85,17 +85,17 @@ export function ProductFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="sm:max-w-lg">
         <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-          <DialogHeader>
-            <DialogTitle>{product ? "Editar producto" : "Nuevo producto"}</DialogTitle>
-            <DialogDescription>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>{product ? "Editar producto" : "Nuevo producto"}</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
               {product
                 ? "El stock se ajusta con un movimiento de stock."
                 : "Registra un producto en el inventario de la organización."}
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           <FieldGroup className="grid gap-4 sm:grid-cols-2">
             <Controller
               name="nombre"
@@ -218,7 +218,7 @@ export function ProductFormDialog({
             />
           </FieldGroup>
           {mutation.isError && <FieldError>{errorMessage(mutation.error)}</FieldError>}
-          <DialogFooter>
+          <ResponsiveDialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
@@ -226,9 +226,9 @@ export function ProductFormDialog({
               {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
               {product ? "Guardar cambios" : "Crear producto"}
             </Button>
-          </DialogFooter>
+          </ResponsiveDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }

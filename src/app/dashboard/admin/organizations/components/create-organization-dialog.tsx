@@ -6,13 +6,13 @@ import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/responsive-dialog"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { errorMessage } from "@/lib/api-client"
@@ -47,19 +47,19 @@ export function CreateOrganizationDialog({
   }
 
   return (
-    <Dialog
+    <ResponsiveDialog
       open={open}
       onOpenChange={(next) => {
         if (next) createOrganization.reset()
         onOpenChange(next)
       }}
     >
-      <DialogContent>
+      <ResponsiveDialogContent>
         <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-          <DialogHeader>
-            <DialogTitle>Nueva organización</DialogTitle>
-            <DialogDescription>Después agrega a su propietario desde Miembros.</DialogDescription>
-          </DialogHeader>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Nueva organización</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>Después agrega a su propietario desde Miembros.</ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           <FieldGroup>
             <Controller
               name="name"
@@ -97,7 +97,7 @@ export function CreateOrganizationDialog({
             />
           </FieldGroup>
           {createOrganization.isError && <FieldError>{errorMessage(createOrganization.error)}</FieldError>}
-          <DialogFooter>
+          <ResponsiveDialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
@@ -105,9 +105,9 @@ export function CreateOrganizationDialog({
               {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
               Crear
             </Button>
-          </DialogFooter>
+          </ResponsiveDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }

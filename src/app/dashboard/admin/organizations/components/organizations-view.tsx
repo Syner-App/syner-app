@@ -5,6 +5,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/page-header"
+import { CardField, ResponsiveList } from "@/components/responsive-list"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,15 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { errorMessage } from "@/lib/api-client"
 import type { Organization } from "@/lib/types"
 import { CreateOrganizationDialog } from "@/app/dashboard/admin/organizations/components/create-organization-dialog"
@@ -32,6 +24,14 @@ import {
 } from "@/app/dashboard/admin/organizations/hooks/useOrganizations"
 
 const dateFormat = new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeZone: "America/Bogota" })
+
+function StatusBadge({ organization }: { organization: Organization }) {
+  return (
+    <Badge variant={organization.status === "ACTIVE" ? "secondary" : "destructive"}>
+      {organization.status === "ACTIVE" ? "Activa" : "Suspendida"}
+    </Badge>
+  )
+}
 
 // Platform panel (superadmin): tenants, their status and members
 export function OrganizationsView() {
@@ -64,74 +64,56 @@ export function OrganizationsView() {
           {errorMessage(organizations.error)}
         </p>
       ) : (
-        <div className="rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Creada</TableHead>
-                <TableHead className="w-12">
-                  <span className="sr-only">Acciones</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {organizations.isPending &&
-                Array.from({ length: 3 }, (_, index) => (
-                  <TableRow key={index}>
-                    <TableCell colSpan={5}>
-                      <Skeleton className="h-6 w-full" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              {organizations.data?.data.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                    Aún no hay organizaciones.
-                  </TableCell>
-                </TableRow>
-              )}
-              {organizations.data?.data.map((organization) => (
-                <TableRow key={organization.id}>
-                  <TableCell className="font-medium">{organization.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{organization.slug}</TableCell>
-                  <TableCell>
-                    <Badge variant={organization.status === "ACTIVE" ? "secondary" : "destructive"}>
-                      {organization.status === "ACTIVE" ? "Activa" : "Suspendida"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {dateFormat.format(new Date(organization.createdAt))}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label={`Acciones de ${organization.name}`}>
-                          <MoreHorizontal />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSelected(organization)}>
-                          <Users />
-                          Miembros
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          variant={organization.status === "ACTIVE" ? "destructive" : "default"}
-                          onClick={() => toggleStatus(organization)}
-                        >
-                          {organization.status === "ACTIVE" ? <Ban /> : <CirclePlay />}
-                          {organization.status === "ACTIVE" ? "Suspender" : "Reactivar"}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <ResponsiveList
+          items={organizations.data?.data}
+          getKey={(organization) => organization.id}
+          isLoading={organizations.isPending}
+          empty="Aún no hay organizaciones."
+          columns={[
+            { header: "Nombre", cell: (organization) => <span className="font-medium">{organization.name}</span> },
+            { header: "Slug", className: "text-muted-foreground", cell: (organization) => organization.slug },
+            { header: "Estado", cell: (organization) => <StatusBadge organization={organization} /> },
+            {
+              header: "Creada",
+              className: "text-muted-foreground",
+              cell: (organization) => dateFormat.format(new Date(organization.createdAt)),
+            },
+          ]}
+          actions={(organization) => (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label={`Acciones de ${organization.name}`}>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSelected(organization)}>
+                  <Users />
+                  Miembros
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant={organization.status === "ACTIVE" ? "destructive" : "default"}
+                  onClick={() => toggleStatus(organization)}
+                >
+                  {organization.status === "ACTIVE" ? <Ban /> : <CirclePlay />}
+                  {organization.status === "ACTIVE" ? "Suspender" : "Reactivar"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          renderCard={(organization) => (
+            <>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate font-medium">{organization.name}</span>
+                  <span className="text-xs text-muted-foreground">{organization.slug}</span>
+                </div>
+                <StatusBadge organization={organization} />
+              </div>
+              <CardField label="Creada">{dateFormat.format(new Date(organization.createdAt))}</CardField>
+            </>
+          )}
+        />
       )}
 
       <CreateOrganizationDialog open={creating} onOpenChange={setCreating} />

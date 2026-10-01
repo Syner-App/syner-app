@@ -7,13 +7,13 @@ import { Controller, useForm } from "react-hook-form"
 import { NumberInput } from "@/components/number-input"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/responsive-dialog"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -47,15 +47,15 @@ export function StockDialog({
   }
 
   return (
-    <Dialog open={product !== undefined} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <ResponsiveDialog open={product !== undefined} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent>
         <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
-          <DialogHeader>
-            <DialogTitle>Movimiento de stock</DialogTitle>
-            <DialogDescription>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Movimiento de stock</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
               {product?.nombre}: {product?.stock_actual} en stock.
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           <FieldGroup>
             <Controller
               name="tipo"
@@ -106,7 +106,7 @@ export function StockDialog({
             />
           </FieldGroup>
           {adjustStock.isError && <FieldError>{errorMessage(adjustStock.error)}</FieldError>}
-          <DialogFooter>
+          <ResponsiveDialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
@@ -114,9 +114,9 @@ export function StockDialog({
               {form.formState.isSubmitting && <Loader2 className="animate-spin" />}
               Registrar
             </Button>
-          </DialogFooter>
+          </ResponsiveDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }

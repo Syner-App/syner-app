@@ -1,9 +1,19 @@
 import {
+  ArrowLeftRight,
   Bell,
+  BookOpen,
   Building2,
+  ChartColumn,
+  CreditCard,
   LayoutDashboard,
   Package,
+  ReceiptText,
   Settings2,
+  ShoppingCart,
+  SlidersHorizontal,
+  Store,
+  Wallet,
+  WalletCards,
 } from "lucide-react"
 
 import { can, isSuperadmin } from "@/lib/permissions"
@@ -25,12 +35,22 @@ export const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Panel",
   "/dashboard/products": "Productos",
   "/dashboard/alerts": "Alertas",
+  "/dashboard/purchase-orders": "Órdenes de compra",
+  "/dashboard/sell": "Registrar venta",
+  "/dashboard/finance": "Resumen financiero",
+  "/dashboard/finance/sales": "Ventas",
+  "/dashboard/finance/movements": "Movimientos",
+  "/dashboard/finance/payables": "Cuentas por pagar",
+  "/dashboard/finance/credits": "Créditos",
+  "/dashboard/finance/recipes": "Recetas e insumos",
+  "/dashboard/finance/reports": "Reportes",
+  "/dashboard/finance/settings": "Configuración financiera",
   "/dashboard/settings/organization": "Organización",
   "/dashboard/admin/organizations": "Organizaciones",
 }
 
 // The sidebar for the user's role: organization routes need a selected organization,
-// settings need owner or admin, and the platform group is for the superadmin
+// finance and settings need owner or admin, and the platform group is for the superadmin
 export function navigationFor(user: User): NavGroup[] {
   const groups: NavGroup[] = []
 
@@ -40,9 +60,33 @@ export function navigationFor(user: User): NavGroup[] {
       items: [
         { title: "Panel", url: "/dashboard", icon: <LayoutDashboard /> },
         { title: "Productos", url: "/dashboard/products", icon: <Package /> },
+        { title: "Órdenes de compra", url: "/dashboard/purchase-orders", icon: <ShoppingCart /> },
         { title: "Alertas", url: "/dashboard/alerts", icon: <Bell /> },
       ],
     })
+
+    if (can.registerSale(user.role)) {
+      groups.push({
+        label: "Ventas",
+        items: [{ title: "Registrar venta", url: "/dashboard/sell", icon: <Store /> }],
+      })
+    }
+
+    if (can.manageFinance(user.role)) {
+      groups.push({
+        label: "Finanzas",
+        items: [
+          { title: "Resumen", url: "/dashboard/finance", icon: <Wallet /> },
+          { title: "Ventas", url: "/dashboard/finance/sales", icon: <ReceiptText /> },
+          { title: "Movimientos", url: "/dashboard/finance/movements", icon: <ArrowLeftRight /> },
+          { title: "Cuentas por pagar", url: "/dashboard/finance/payables", icon: <WalletCards /> },
+          { title: "Créditos", url: "/dashboard/finance/credits", icon: <CreditCard /> },
+          { title: "Recetas e insumos", url: "/dashboard/finance/recipes", icon: <BookOpen /> },
+          { title: "Reportes", url: "/dashboard/finance/reports", icon: <ChartColumn /> },
+          { title: "Configuración", url: "/dashboard/finance/settings", icon: <SlidersHorizontal /> },
+        ],
+      })
+    }
   }
 
   if (can.viewOrganization(user.role)) {

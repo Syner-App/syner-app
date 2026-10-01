@@ -14,7 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-// A destructive action that needs confirmation. Stays open while `onConfirm` runs and
+// An action that needs confirmation (destructive by default). Stays open while `onConfirm` runs and
 // closes when it resolves; a rejection keeps it open (the caller shows the error)
 export function ConfirmDialog({
   open,
@@ -24,6 +24,7 @@ export function ConfirmDialog({
   isPending,
   onConfirm,
   onOpenChange,
+  destructive = true,
 }: {
   open: boolean
   title: string
@@ -32,6 +33,8 @@ export function ConfirmDialog({
   isPending: boolean
   onConfirm: () => Promise<unknown>
   onOpenChange: (open: boolean) => void
+  // false for confirmations that are not destructive (approve, receive, close a period)
+  destructive?: boolean
 }) {
   const submitting = useRef(false)
 
@@ -45,7 +48,7 @@ export function ConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant={destructive ? "destructive" : "default"}
             disabled={isPending || !open}
             onClick={(event) => {
               event.preventDefault()

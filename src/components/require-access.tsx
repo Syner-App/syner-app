@@ -39,6 +39,7 @@ function Blocked({ title, description }: { title: string; description: string })
 // Role checks a page can ask for (plain strings: pages are Server Components)
 const ACCESS = {
   organizationManager: (user: User) => can.viewOrganization(user.role),
+  financeManager: (user: User) => can.manageFinance(user.role),
   superadmin: isSuperadmin,
 }
 

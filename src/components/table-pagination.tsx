@@ -21,8 +21,12 @@ export function TablePagination({
         {total} {total === 1 ? "resultado" : "resultados"}
       </span>
       <div className="flex items-center gap-2">
-        <span>
-          Página {lastPage === 0 ? 0 : page} de {lastPage}
+        <span className="tabular-nums">
+          <span className="hidden sm:inline">Página </span>
+          {lastPage === 0 ? 0 : page}
+          <span className="hidden sm:inline"> de </span>
+          <span className="sm:hidden">/</span>
+          {lastPage}
         </span>
         <Button
           variant="outline"

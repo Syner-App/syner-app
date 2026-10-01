@@ -33,13 +33,47 @@ function translate(message: string): string {
   const stock = /^Insufficient stock .*: (\d+) available, (\d+) requested/.exec(message)
   if (stock) return `Stock insuficiente: hay ${stock[1]} disponibles y se pidieron ${stock[2]}`
   if (/^Organization .+ already exists$/.test(message)) return "Ya existe una organización con ese slug"
+  return translateOperations(message)
+}
+
+// orders-ms and finance-ms
+const OPERATION_MESSAGES: Record<string, string> = {
+  "Register the break-even assumptions first": "Primero registra los supuestos del punto de equilibrio",
+  "Register the recipes or a manual costo_variable_unitario in the assumptions":
+    "Registra las recetas o un costo variable unitario manual en los supuestos",
+  "Product validation timed out": "La validación del producto tardó demasiado",
+}
+
+const OPERATION_PATTERNS: [RegExp, (match: RegExpExecArray) => string][] = [
+  [/^Purchase order #\S+ is (\w+) and cannot be moved to (\w+)/, (m) => `La orden está ${m[1]} y no puede pasar a ${m[2]}`],
+  [/^Purchase order #\S+ already has a payable/, () => "La orden ya tiene una cuenta por pagar"],
+  [/^Product #(\d+) not found or inactive/, (m) => `El producto #${m[1]} no existe o está inactivo`],
+  [/^(\w[\w ]*) with id: #\S+ not found/, () => "El registro no existe"],
+  [/^Credit #\S+ is already paid off/, () => "El crédito ya está pagado"],
+  [/^Expense #\S+ is already paid/, () => "El gasto ya está pagado"],
+  [/^Recipe #\S+ \((.+)\) is inactive/, (m) => `La receta ${m[1]} está inactiva`],
+  [/^The supplies of sale #\S+ were already discounted/, () => "Los insumos de esta venta ya se descontaron"],
+  [/^The period (\S+) is closed; reopen it/, (m) => `El periodo ${m[1]} está cerrado: reábrelo para registrar movimientos`],
+  [/^The period (\S+) is not closed/, (m) => `El periodo ${m[1]} no está cerrado`],
+  [/^The period (\S+) has not started yet/, (m) => `El periodo ${m[1]} aún no ha empezado`],
+  [/^The period (\S+) is already closed/, (m) => `El periodo ${m[1]} ya está cerrado`],
+  [/^The prepayment \((\d+)\) is greater than the principal \((\d+)\)/, (m) => `El abono (${m[1]}) supera el saldo de capital (${m[2]})`],
+  [/is not available/, () => "El servicio no está disponible, intenta de nuevo en un momento"],
+]
+
+function translateOperations(message: string): string {
+  if (OPERATION_MESSAGES[message]) return OPERATION_MESSAGES[message]
+  for (const [pattern, toSpanish] of OPERATION_PATTERNS) {
+    const match = pattern.exec(message)
+    if (match) return toSpanish(match)
+  }
   return message
 }
 
 type Query = Record<string, string | number | boolean | undefined | null>
 
 interface ApiOptions {
-  method?: "GET" | "POST" | "PATCH" | "DELETE"
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
   body?: unknown
   query?: Query
   // false for calls where a 401 is an expected answer (login)

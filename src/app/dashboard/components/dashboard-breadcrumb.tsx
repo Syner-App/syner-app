@@ -28,7 +28,7 @@ export function DashboardBreadcrumb() {
         </BreadcrumbItem>
         <BreadcrumbSeparator className="hidden md:block" />
         <BreadcrumbItem>
-          <BreadcrumbPage>{ROUTE_TITLES[pathname] ?? "Panel"}</BreadcrumbPage>
+          <BreadcrumbPage className="truncate">{ROUTE_TITLES[pathname] ?? "Panel"}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
