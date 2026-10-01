@@ -87,12 +87,14 @@ export function OrganizationMembersSheet({
           description="Perderá el acceso a la organización de inmediato. Su cuenta se conserva."
           confirmLabel="Quitar"
           isPending={removeMember.isPending}
-          onConfirm={() =>
-            removeMember.mutateAsync({ id, user_id: removing!.user_id }).catch((error: unknown) => {
+          onConfirm={() => {
+            // No `removing!`: React Compiler reads the callback's dependencies during render
+            if (!removing) return Promise.resolve()
+            return removeMember.mutateAsync({ id, user_id: removing.user_id }).catch((error: unknown) => {
               toast.error(errorMessage(error))
               throw error
             })
-          }
+          }}
           onOpenChange={(open) => !open && setRemoving(undefined)}
         />
       </SheetContent>

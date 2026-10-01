@@ -1,6 +1,7 @@
 "use client"
 
 import { Loader2 } from "lucide-react"
+import { useRef } from "react"
 
 import {
   AlertDialog,
@@ -32,6 +33,8 @@ export function ConfirmDialog({
   onConfirm: () => Promise<unknown>
   onOpenChange: (open: boolean) => void
 }) {
+  const submitting = useRef(false)
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -43,13 +46,21 @@ export function ConfirmDialog({
           <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
-            disabled={isPending}
+            disabled={isPending || !open}
             onClick={(event) => {
               event.preventDefault()
-              onConfirm().then(
-                () => onOpenChange(false),
-                () => undefined
-              )
+              // Ignore clicks while a confirmation runs or the dialog is closing: the
+              // caller has already cleared the target it confirms
+              if (submitting.current || !open) return
+              submitting.current = true
+              onConfirm()
+                .then(
+                  () => onOpenChange(false),
+                  () => undefined
+                )
+                .finally(() => {
+                  submitting.current = false
+                })
             }}
           >
             {isPending && <Loader2 className="animate-spin" />}

@@ -23,12 +23,14 @@ export function DeleteProductDialog({
       description="Dejará de aparecer en el inventario y no se puede restaurar. Su SKU queda reservado."
       confirmLabel="Eliminar"
       isPending={deleteProduct.isPending}
-      onConfirm={() =>
-        deleteProduct.mutateAsync(product!.id).catch((error: unknown) => {
+      onConfirm={() => {
+        // No `product!`: React Compiler reads the callback's dependencies during render
+        if (!product) return Promise.resolve()
+        return deleteProduct.mutateAsync(product.id).catch((error: unknown) => {
           toast.error(errorMessage(error))
           throw error
         })
-      }
+      }}
       onOpenChange={onOpenChange}
     />
   )
