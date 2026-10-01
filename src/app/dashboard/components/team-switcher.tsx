@@ -1,15 +1,13 @@
 "use client"
 
-import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import { Building2, Check, ChevronsUpDown, Loader2, ShieldCheck } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -18,73 +16,78 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { errorMessage } from "@/lib/api-client"
+import { ROLE_LABELS, isSuperadmin } from "@/lib/permissions"
+import type { Session } from "@/lib/types"
+import { useSwitchOrganization } from "@/hooks/use-session"
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ReactNode
-    plan: string
-  }[]
-}) {
+// The organization the session is scoped to, and the others the user can switch to
+export function TeamSwitcher({ session }: { session: Session }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const switchOrganization = useSwitchOrganization()
+  const { user, memberships } = session
 
-  if (!activeTeam) {
-    return null
+  const active = memberships.find(({ organization_id }) => organization_id === user.organization_id)
+  const title = active?.organization_name ?? (isSuperadmin(user) ? "Plataforma" : "Sin organización")
+  const subtitle = active ? ROLE_LABELS[active.role] : isSuperadmin(user) ? "Superadmin" : "Elige una"
+
+  function select(organization_id: string) {
+    if (organization_id === user.organization_id) return
+    switchOrganization.mutate(organization_id, {
+      onError: (error) => toast.error(errorMessage(error)),
+    })
   }
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild disabled={memberships.length === 0}>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                {activeTeam.logo}
+                {switchOrganization.isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : active ? (
+                  <Building2 />
+                ) : (
+                  <ShieldCheck />
+                )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate font-medium">{title}</span>
+                <span className="truncate text-xs">{subtitle}</span>
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              {memberships.length > 0 && <ChevronsUpDown className="ml-auto" />}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-fit"
+            className="w-fit min-w-56"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Equipos
+              Organizaciones
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {memberships.map((membership) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={membership.organization_id}
+                onClick={() => select(membership.organization_id)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  {team.logo}
+                  <Building2 className="size-4" />
                 </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                <div className="flex flex-col">
+                  <span>{membership.organization_name}</span>
+                  <span className="text-xs text-muted-foreground">{ROLE_LABELS[membership.role]}</span>
+                </div>
+                {membership.organization_id === user.organization_id && <Check className="ml-auto" />}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                <Plus className="size-4" />
-              </div>
-              <div className="font-medium text-muted-foreground">
-                Agregar equipo
-              </div>
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
