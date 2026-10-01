@@ -7,6 +7,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
@@ -30,6 +31,11 @@ export function NavMain({ groups }: { groups: NavGroup[] }) {
                 <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>
+            {item.badge ? (
+              <SidebarMenuBadge className="bg-destructive text-white peer-hover/menu-button:text-white peer-data-active/menu-button:text-white">
+                {item.badge > 99 ? "99+" : item.badge}
+              </SidebarMenuBadge>
+            ) : null}
           </SidebarMenuItem>
         ))}
       </SidebarMenu>

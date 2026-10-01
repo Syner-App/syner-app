@@ -6,11 +6,14 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/app/dashboard/components/app-sidebar"
+import { AlertNotifications } from "@/app/dashboard/alerts/components/alert-notifications"
+import { AlertsBell } from "@/app/dashboard/alerts/components/alerts-bell"
 import { DashboardBreadcrumb } from "@/app/dashboard/components/dashboard-breadcrumb"
 
 export default function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   return (
     <SidebarProvider>
+      <AlertNotifications />
       <AppSidebar />
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 bg-background/95 backdrop-blur transition-[width,height] ease-linear supports-backdrop-filter:bg-background/80 md:static md:h-16 md:bg-background md:backdrop-blur-none group-has-data-[collapsible=icon]/sidebar-wrapper:md:h-12">
@@ -22,7 +25,8 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
             />
             <DashboardBreadcrumb />
           </div>
-          <div className="ml-auto px-3 sm:px-4">
+          <div className="ml-auto flex items-center gap-1 px-3 sm:px-4">
+            <AlertsBell />
             <ModeToggle />
           </div>
         </header>

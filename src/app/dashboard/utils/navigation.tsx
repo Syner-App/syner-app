@@ -23,6 +23,8 @@ export interface NavItem {
   title: string
   url: string
   icon: React.ReactNode
+  // Count shown next to the item (active alerts)
+  badge?: number
 }
 
 export interface NavGroup {

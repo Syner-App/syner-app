@@ -14,3 +14,14 @@ export function useAlerts(filters: AlertFilters) {
     placeholderData: keepPreviousData,
   })
 }
+
+// Active alerts of the organization (sidebar and header badges). Under ALERTS_KEY, so the
+// socket events and the stock mutations refresh it
+export function useActiveAlertsCount(enabled: boolean) {
+  return useQuery({
+    queryKey: [...ALERTS_KEY, "active-count"],
+    queryFn: () => getAlertsAction({ page: 1, limit: 1, estado: "ACTIVA" }),
+    select: (result) => result.meta.total,
+    enabled,
+  })
+}

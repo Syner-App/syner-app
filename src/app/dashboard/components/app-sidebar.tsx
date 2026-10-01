@@ -14,10 +14,21 @@ import { useSession } from "@/hooks/use-session"
 import { NavMain } from "@/app/dashboard/components/nav-main"
 import { NavUser } from "@/app/dashboard/components/nav-user"
 import { TeamSwitcher } from "@/app/dashboard/components/team-switcher"
-import { navigationFor } from "@/app/dashboard/utils/navigation"
+import { navigationFor, type NavGroup } from "@/app/dashboard/utils/navigation"
+import { useActiveAlertsCount } from "@/app/dashboard/alerts/hooks/useAlerts"
+
+const ALERTS_URL = "/dashboard/alerts"
+
+function withAlertsBadge(groups: NavGroup[], count: number | undefined): NavGroup[] {
+  return groups.map((group) => ({
+    ...group,
+    items: group.items.map((item) => (item.url === ALERTS_URL ? { ...item, badge: count } : item)),
+  }))
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession()
+  const { data: activeAlerts } = useActiveAlertsCount(Boolean(session?.user.organization_id))
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -25,7 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {session ? <TeamSwitcher session={session} /> : <Skeleton className="h-12 w-full" />}
       </SidebarHeader>
       <SidebarContent>
-        {session && <NavMain groups={navigationFor(session.user)} />}
+        {session && <NavMain groups={withAlertsBadge(navigationFor(session.user), activeAlerts)} />}
       </SidebarContent>
       <SidebarFooter>
         {session ? <NavUser user={session.user} /> : <Skeleton className="h-12 w-full" />}
