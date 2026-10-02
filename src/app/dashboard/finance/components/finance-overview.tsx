@@ -73,7 +73,8 @@ export function FinanceOverview() {
           icon={<Target />}
           value={dashboard.isPending ? undefined : answers?.vender_por_dia != null ? formatNumber(answers.vender_por_dia) : "—"}
           hint={
-            answers?.vender_por_dia_con_credito != null
+            answers?.vender_por_dia_con_credito != null &&
+            answers.vender_por_dia_con_credito !== answers.vender_por_dia
               ? `${formatNumber(answers.vender_por_dia_con_credito)} con la cuota del crédito`
               : "unidades para el equilibrio"
           }
