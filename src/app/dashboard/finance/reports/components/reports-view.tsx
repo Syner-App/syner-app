@@ -281,6 +281,9 @@ function BreakEvenTab() {
   if (breakEven.isError) return <ErrorText error={breakEven.error} />
   if (!data) return <Skeleton className="h-80 w-full" />
 
+  // Without an assigned installment the credit break-even equals the plain one
+  const hasCredit = data.cuota_asignada > 0
+
   return (
     <div className="flex flex-col gap-4">
       {data.mensaje && (
@@ -288,17 +291,19 @@ function BreakEvenTab() {
           {data.mensaje}
         </p>
       )}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className={`grid grid-cols-2 gap-3 ${hasCredit ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <StatCard
           title="Por día"
           value={data.pe_diario != null ? formatNumber(data.pe_diario) : "—"}
           hint="unidades para no perder"
         />
-        <StatCard
-          title="Por día con crédito"
-          value={data.pe_credito_diario != null ? formatNumber(data.pe_credito_diario) : "—"}
-          hint="cubriendo la cuota asignada"
-        />
+        {hasCredit && (
+          <StatCard
+            title="Por día con crédito"
+            value={data.pe_credito_diario != null ? formatNumber(data.pe_credito_diario) : "—"}
+            hint="cubriendo la cuota asignada"
+          />
+        )}
         <StatCard title="Ventas al mes" value={data.pe_dinero != null ? formatMoney(data.pe_dinero) : "—"} />
         <StatCard title="Razón de contribución" value={formatPercent(data.razon_contribucion)} />
       </div>
@@ -327,16 +332,20 @@ function BreakEvenTab() {
           </CardHeader>
           <CardContent className="flex flex-col gap-1.5">
             <CardField label="Costos fijos">{formatMoney(data.costos_fijos)}</CardField>
-            <CardField label="Cuota asignada">{formatMoney(data.cuota_asignada)}</CardField>
+            {hasCredit && <CardField label="Cuota asignada">{formatMoney(data.cuota_asignada)}</CardField>}
             <CardField label="Unidades de equilibrio">
               {data.pe_unidades != null ? formatNumber(data.pe_unidades) : "—"}
             </CardField>
-            <CardField label="Unidades con crédito">
-              {data.pe_credito_unidades != null ? formatNumber(data.pe_credito_unidades) : "—"}
-            </CardField>
-            <CardField label="Ventas con crédito">
-              {data.pe_credito_dinero != null ? formatMoney(data.pe_credito_dinero) : "—"}
-            </CardField>
+            {hasCredit && (
+              <>
+                <CardField label="Unidades con crédito">
+                  {data.pe_credito_unidades != null ? formatNumber(data.pe_credito_unidades) : "—"}
+                </CardField>
+                <CardField label="Ventas con crédito">
+                  {data.pe_credito_dinero != null ? formatMoney(data.pe_credito_dinero) : "—"}
+                </CardField>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
