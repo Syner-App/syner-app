@@ -27,7 +27,7 @@ const MESSAGES: Record<string, string> = {
   "Product with the same organization_id, codigo_sku already exists": "Ya existe un producto con ese SKU",
 }
 
-function translate(message: string): string {
+export function translate(message: string): string {
   if (MESSAGES[message]) return MESSAGES[message]
   if (/is already a member/.test(message)) return "El usuario ya es miembro de la organización"
   const stock = /^Insufficient stock .*: (\d+) available, (\d+) requested/.exec(message)

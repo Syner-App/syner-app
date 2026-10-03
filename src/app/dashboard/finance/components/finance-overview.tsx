@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { errorMessage } from "@/lib/api-client"
 import { formatMoney, formatNumber, formatPercent, formatPeriod } from "@/lib/format"
-import { FinanceAlerts } from "@/app/dashboard/finance/components/finance-alerts"
+import { FinanceAlerts, MISSING_ASSUMPTIONS } from "@/app/dashboard/finance/components/finance-alerts"
 import { MoneyRows } from "@/app/dashboard/finance/components/money-rows"
 import { useFinanceDashboard } from "@/app/dashboard/finance/hooks/useFinanceQueries"
 
@@ -65,7 +65,8 @@ export function FinanceOverview() {
         </Card>
       )}
 
-      {data && <FinanceAlerts alerts={data.alertas} />}
+      {/* The setup card above already covers the missing assumptions */}
+      {data && <FinanceAlerts alerts={data.alertas.filter(({ codigo }) => codigo !== MISSING_ASSUMPTIONS)} />}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
