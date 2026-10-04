@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form"
 
+import { MoneyInput } from "@/components/money-input"
 import { NumberInput } from "@/components/number-input"
 import {
   ResponsiveDialog,
@@ -82,8 +83,41 @@ export function NumberField<T extends FieldValues>({
   className,
   decimal,
   min = 0,
-  prefix,
-}: BaseProps<T> & { decimal?: boolean; min?: number; prefix?: string }) {
+}: BaseProps<T> & { decimal?: boolean; min?: number }) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid} className={className}>
+          <FieldLabel htmlFor={name}>{label}</FieldLabel>
+          <NumberInput
+            id={name}
+            min={min}
+            step={decimal ? "any" : 1}
+            inputMode={decimal ? "decimal" : "numeric"}
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            aria-invalid={fieldState.invalid}
+          />
+          {description && <FieldDescription>{description}</FieldDescription>}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </Field>
+      )}
+    />
+  )
+}
+
+// Amount of money: "$" prefix and the thousands grouped while typing
+export function MoneyField<T extends FieldValues>({
+  control,
+  name,
+  label,
+  description,
+  className,
+  decimal,
+}: BaseProps<T> & { decimal?: boolean }) {
   return (
     <Controller
       name={name}
@@ -92,17 +126,13 @@ export function NumberField<T extends FieldValues>({
         <Field data-invalid={fieldState.invalid} className={className}>
           <FieldLabel htmlFor={name}>{label}</FieldLabel>
           <div className="relative">
-            {prefix && (
-              <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm text-muted-foreground">
-                {prefix}
-              </span>
-            )}
-            <NumberInput
+            <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm text-muted-foreground">
+              $
+            </span>
+            <MoneyInput
               id={name}
-              min={min}
-              step={decimal ? "any" : 1}
-              inputMode={decimal ? "decimal" : "numeric"}
-              className={prefix ? "pl-6" : undefined}
+              decimal={decimal}
+              className="pl-6"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -115,10 +145,6 @@ export function NumberField<T extends FieldValues>({
       )}
     />
   )
-}
-
-export function MoneyField<T extends FieldValues>(props: BaseProps<T> & { min?: number }) {
-  return <NumberField {...props} prefix="$" />
 }
 
 export function DateField<T extends FieldValues>(props: BaseProps<T> & { type?: "date" | "month" }) {

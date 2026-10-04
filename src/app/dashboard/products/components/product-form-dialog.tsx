@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
 
+import { MoneyInput } from "@/components/money-input"
 import { NumberInput } from "@/components/number-input"
 import { Button } from "@/components/ui/button"
 import {
@@ -152,15 +153,19 @@ export function ProductFormDialog({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="product-precio">Precio</FieldLabel>
-                  <NumberInput
-                    id="product-precio"
-                    min={0}
-                    step={1}
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    aria-invalid={fieldState.invalid}
-                  />
+                  <div className="relative">
+                    <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm text-muted-foreground">
+                      $
+                    </span>
+                    <MoneyInput
+                      id="product-precio"
+                      className="pl-6"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      aria-invalid={fieldState.invalid}
+                    />
+                  </div>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}

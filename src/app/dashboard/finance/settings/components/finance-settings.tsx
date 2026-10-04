@@ -82,11 +82,10 @@ function AssumptionsForm({ assumptions }: { assumptions: Assumptions | null }) {
         <CardContent>
           <FieldGroup className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <MoneyField control={form.control} name="precio_promedio" label="Precio promedio de venta" />
-            <NumberField
+            <MoneyField
               control={form.control}
               name="costo_variable_unitario"
               label="Costo variable unitario"
-              prefix="$"
               description="Vacío: se calcula de los productos."
             />
             <NumberField control={form.control} name="dias_operacion" label="Días de operación al mes" min={1} />

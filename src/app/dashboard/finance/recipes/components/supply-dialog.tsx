@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
-import { FormDialog, NumberField, SelectField } from "@/components/form-fields"
+import { FormDialog, MoneyField, SelectField } from "@/components/form-fields"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ProductCombobox } from "@/app/dashboard/products/components/product-combobox"
@@ -85,11 +85,10 @@ export function SupplyDialog({
         />
       )}
       <SelectField control={form.control} name="categoria" label="Categoría" options={categoryOptions} />
-      <NumberField
+      <MoneyField
         control={form.control}
         name="costo_unitario"
         label="Costo por unidad"
-        prefix="$"
         decimal
         description="Se actualiza al pagar cada factura."
       />
