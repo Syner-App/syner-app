@@ -37,7 +37,7 @@ export interface NavGroup {
 // Breadcrumb titles by route
 export const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Panel",
-  "/dashboard/products": "Productos e insumos",
+  "/dashboard/products": "Stock Productos e insumos",
   "/dashboard/alerts": "Alertas",
   "/dashboard/purchase-orders": "Órdenes de compra",
   "/dashboard/sell": "Registrar venta",
@@ -46,7 +46,7 @@ export const ROUTE_TITLES: Record<string, string> = {
   "/dashboard/finance/movements": "Movimientos",
   "/dashboard/finance/payables": "Cuentas por pagar",
   "/dashboard/finance/credits": "Créditos",
-  "/dashboard/finance/recipes": "Recetas e insumos",
+  "/dashboard/finance/recipes": "Productos e insumos",
   "/dashboard/finance/reports": "Reportes",
   "/dashboard/finance/settings": "Configuración financiera",
   "/dashboard/settings/organization": "Organización",
@@ -85,7 +85,7 @@ export function navigationFor(user: User): NavGroup[] {
           { title: "Movimientos", url: "/dashboard/finance/movements", icon: <ArrowLeftRight /> },
           { title: "Cuentas por pagar", url: "/dashboard/finance/payables", icon: <WalletCards /> },
           { title: "Créditos", url: "/dashboard/finance/credits", icon: <CreditCard /> },
-          { title: "Recetas e insumos", url: "/dashboard/finance/recipes", icon: <BookOpen /> },
+          { title: "Productos e insumos", url: "/dashboard/finance/recipes", icon: <BookOpen /> },
           { title: "Reportes", url: "/dashboard/finance/reports", icon: <ChartColumn /> },
           { title: "Configuración", url: "/dashboard/finance/settings", icon: <SlidersHorizontal /> },
         ],

@@ -180,10 +180,10 @@ export function SalePos() {
       {recipes.data && active.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           <ShoppingBag className="size-8" />
-          <p>No hay recetas activas para vender.</p>
+          <p>No hay productos activos para vender.</p>
           {can.manageFinance(session?.user.role) && (
             <Button asChild variant="outline">
-              <Link href="/dashboard/finance/recipes">Crear recetas</Link>
+              <Link href="/dashboard/finance/recipes">Crear productos</Link>
             </Button>
           )}
         </div>

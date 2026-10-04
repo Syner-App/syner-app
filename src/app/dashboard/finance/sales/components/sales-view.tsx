@@ -105,7 +105,7 @@ export function SalesView() {
     <>
       <PageHeader
         title="Ventas"
-        description="Cada venta descuenta del inventario los insumos de sus recetas."
+        description="Cada venta descuenta del inventario los insumos de sus productos."
         actions={
           <Button asChild>
             <Link href="/dashboard/sell">

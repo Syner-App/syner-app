@@ -4,7 +4,7 @@ import { RequireAccess } from "@/components/require-access"
 import { RecipesView } from "@/app/dashboard/finance/recipes/components/recipes-view"
 
 export const metadata: Metadata = {
-  title: "Recetas e insumos",
+  title: "Productos e insumos",
 }
 
 export default function Page() {

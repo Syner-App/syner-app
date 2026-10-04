@@ -106,13 +106,13 @@ export function RecipesView() {
   return (
     <>
       <PageHeader
-        title="Recetas e insumos"
+        title="Productos e insumos"
         description="Define qué vendes y cuánto cuesta producir cada unidad."
         actions={
           tab === "recipes" ? (
             <Button disabled={supplies.data?.data.length === 0} onClick={() => setDialog({ type: "recipe" })}>
               <Plus />
-              Nueva receta
+              Nuevo producto
             </Button>
           ) : (
             <Button onClick={() => setDialog({ type: "supply" })}>
@@ -126,7 +126,7 @@ export function RecipesView() {
         value={tab}
         onChange={setTab}
         options={[
-          { value: "recipes", label: `Recetas${recipes.data ? ` (${recipes.data.data.length})` : ""}` },
+          { value: "recipes", label: `Productos${recipes.data ? ` (${recipes.data.data.length})` : ""}` },
           { value: "supplies", label: `Insumos${supplies.data ? ` (${supplies.data.data.length})` : ""}` },
         ]}
       />
@@ -139,7 +139,7 @@ export function RecipesView() {
             </p>
           )}
           {supplies.data?.data.length === 0 && (
-            <p className="text-sm text-muted-foreground">Primero registra los insumos para armar las recetas.</p>
+            <p className="text-sm text-muted-foreground">Primero registra los insumos para armar los productos.</p>
           )}
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {recipes.isPending && Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-56 rounded-xl" />)}
@@ -149,7 +149,7 @@ export function RecipesView() {
           </div>
           {recipes.data?.data.length === 0 && (
             <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No hay recetas todavía.
+              No hay productos todavía.
             </p>
           )}
         </>

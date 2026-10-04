@@ -57,10 +57,10 @@ export const useRetrySaleStock = () =>
 
 export const useUpsertSupply = () => useFinanceMutation(upsertSupplyAction, (supply) => `Insumo ${supply.nombre} guardado`)
 
-export const useCreateRecipe = () => useFinanceMutation(createRecipeAction, (recipe) => `Receta ${recipe.nombre} creada`)
+export const useCreateRecipe = () => useFinanceMutation(createRecipeAction, (recipe) => `Producto ${recipe.nombre} creado`)
 
 export const useUpdateRecipe = () =>
-  useFinanceMutation(updateRecipeAction, (recipe) => `Receta ${recipe.nombre} actualizada`)
+  useFinanceMutation(updateRecipeAction, (recipe) => `Producto ${recipe.nombre} actualizado`)
 
 export const usePayPayable = () => useFinanceMutation(payPayableAction, () => "Cuenta pagada")
 

@@ -63,7 +63,7 @@ export function RecipeDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={recipe ? `Editar ${recipe.nombre}` : "Nueva receta"}
+      title={recipe ? `Editar ${recipe.nombre}` : "Nuevo producto"}
       description="Lo que se vende y los insumos que consume cada unidad."
       onSubmit={form.handleSubmit(onSubmit)}
       isSubmitting={form.formState.isSubmitting}

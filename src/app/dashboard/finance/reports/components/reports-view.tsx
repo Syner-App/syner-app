@@ -312,7 +312,7 @@ function BreakEvenTab() {
           <CardHeader>
             <CardTitle>Por unidad</CardTitle>
             <CardDescription>
-              Costo variable {data.cvu_origen === "RECETAS" ? "calculado de las recetas" : "manual"}.
+              Costo variable {data.cvu_origen === "RECETAS" ? "calculado de los productos" : "manual"}.
             </CardDescription>
           </CardHeader>
           <CardContent>

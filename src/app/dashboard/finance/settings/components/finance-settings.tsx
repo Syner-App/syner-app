@@ -87,7 +87,7 @@ function AssumptionsForm({ assumptions }: { assumptions: Assumptions | null }) {
               name="costo_variable_unitario"
               label="Costo variable unitario"
               prefix="$"
-              description="Vacío: se calcula de las recetas."
+              description="Vacío: se calcula de los productos."
             />
             <NumberField control={form.control} name="dias_operacion" label="Días de operación al mes" min={1} />
             <MoneyField control={form.control} name="arriendo" label="Arriendo" />

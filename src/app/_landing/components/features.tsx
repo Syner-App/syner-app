@@ -14,7 +14,7 @@ const FEATURES = [
     icon: ShoppingCart,
     accent: "var(--cobalt)",
     title: "Ventas",
-    text: "Registras la venta en segundos y el stock se descuenta solo, también el de los insumos de lo que preparas con receta.",
+    text: "Registras la venta en segundos y el stock se descuenta solo, también el de los insumos de tus productos.",
   },
   {
     icon: BellRing,

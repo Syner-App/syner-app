@@ -40,7 +40,7 @@ export function translate(message: string): string {
 const OPERATION_MESSAGES: Record<string, string> = {
   "Register the break-even assumptions first": "Primero registra los supuestos del punto de equilibrio",
   "Register the recipes or a manual costo_variable_unitario in the assumptions":
-    "Registra las recetas o un costo variable unitario manual en los supuestos",
+    "Registra los productos o un costo variable unitario manual en los supuestos",
   "Product validation timed out": "La validación del producto tardó demasiado",
 }
 
@@ -51,7 +51,7 @@ const OPERATION_PATTERNS: [RegExp, (match: RegExpExecArray) => string][] = [
   [/^(\w[\w ]*) with id: #\S+ not found/, () => "El registro no existe"],
   [/^Credit #\S+ is already paid off/, () => "El crédito ya está pagado"],
   [/^Expense #\S+ is already paid/, () => "El gasto ya está pagado"],
-  [/^Recipe #\S+ \((.+)\) is inactive/, (m) => `La receta ${m[1]} está inactiva`],
+  [/^Recipe #\S+ \((.+)\) is inactive/, (m) => `El producto ${m[1]} está inactivo`],
   [/^The supplies of sale #\S+ were already discounted/, () => "Los insumos de esta venta ya se descontaron"],
   [/^The period (\S+) is closed; reopen it/, (m) => `El periodo ${m[1]} está cerrado: reábrelo para registrar movimientos`],
   [/^The period (\S+) is not closed/, (m) => `El periodo ${m[1]} no está cerrado`],
