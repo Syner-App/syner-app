@@ -2,8 +2,13 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { ReactNode } from "react"
+import { z } from "zod"
+import { es } from "zod/locales"
 
 import { ApiError } from "@/lib/api-client"
+
+// Spanish for the zod checks without a message of their own (.int(), .positive())
+z.config(es())
 
 let browserQueryClient: QueryClient | undefined
 

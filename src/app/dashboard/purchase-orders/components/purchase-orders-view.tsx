@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { useSession } from "@/hooks/use-session"
 import { errorMessage } from "@/lib/api-client"
 import { formatDate, formatNumber } from "@/lib/format"
+import { translate } from "@/lib/messages"
 import { can } from "@/lib/permissions"
 import { useProductLookup } from "@/app/dashboard/products/hooks/useProductLookup"
 import { CreatePurchaseOrderDialog } from "@/app/dashboard/purchase-orders/components/create-purchase-order-dialog"
@@ -168,8 +169,8 @@ export function PurchaseOrdersView() {
         <div className="flex flex-col">
           <span className="font-medium">{nameOf(order.producto_id)}</span>
           {order.motivo && (
-            <span className="max-w-64 truncate text-xs text-muted-foreground" title={order.motivo}>
-              {order.motivo}
+            <span className="max-w-64 truncate text-xs text-muted-foreground" title={translate(order.motivo)}>
+              {translate(order.motivo)}
             </span>
           )}
         </div>
@@ -234,7 +235,7 @@ export function PurchaseOrdersView() {
               <CardField label="Proveedor">{order.proveedor}</CardField>
               <CardField label="Cantidad">{formatNumber(order.cantidad_solicitada)}</CardField>
               <CardField label="Fecha">{formatDate(order.createdAt)}</CardField>
-              {order.motivo && <p className="text-xs text-muted-foreground">{order.motivo}</p>}
+              {order.motivo && <p className="text-xs text-muted-foreground">{translate(order.motivo)}</p>}
             </>
           )}
         />

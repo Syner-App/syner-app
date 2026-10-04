@@ -1,6 +1,8 @@
 // Browser calls to the BFF route handlers (src/app/api), which forward them to
 // client-gateway with the session cookie
 
+import { translate } from "@/lib/messages"
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -9,65 +11,6 @@ export class ApiError extends Error {
     super(messages.join(". "))
     this.name = "ApiError"
   }
-}
-
-// Spanish text for the backend messages a user can run into; anything else is shown as is
-const MESSAGES: Record<string, string> = {
-  "Invalid credentials": "Correo o contraseña incorrectos",
-  "Invalid token": "Tu sesión expiró, vuelve a iniciar sesión",
-  "You do not belong to any active organization": "No perteneces a ninguna organización activa",
-  "You are not a member of this organization": "No eres miembro de esta organización",
-  "The organization is suspended": "La organización está suspendida",
-  "You cannot change your own role": "No puedes cambiar tu propio rol",
-  "You cannot remove yourself": "No puedes quitarte a ti mismo",
-  "An admin can only add members with role user": "Un administrador solo puede agregar miembros con rol usuario",
-  "An admin can only remove members with role user": "Un administrador solo puede quitar miembros con rol usuario",
-  "name and password are required to create a new user":
-    "El usuario no existe: ingresa nombre y contraseña para crearlo",
-  "Product with the same organization_id, codigo_sku already exists": "Ya existe un producto con ese SKU",
-}
-
-export function translate(message: string): string {
-  if (MESSAGES[message]) return MESSAGES[message]
-  if (/is already a member/.test(message)) return "El usuario ya es miembro de la organización"
-  const stock = /^Insufficient stock .*: (\d+) available, (\d+) requested/.exec(message)
-  if (stock) return `Stock insuficiente: hay ${stock[1]} disponibles y se pidieron ${stock[2]}`
-  if (/^Organization .+ already exists$/.test(message)) return "Ya existe una organización con ese slug"
-  return translateOperations(message)
-}
-
-// orders-ms and finance-ms
-const OPERATION_MESSAGES: Record<string, string> = {
-  "Register the break-even assumptions first": "Primero registra los supuestos del punto de equilibrio",
-  "Register the recipes or a manual costo_variable_unitario in the assumptions":
-    "Registra los productos o un costo variable unitario manual en los supuestos",
-  "Product validation timed out": "La validación del producto tardó demasiado",
-}
-
-const OPERATION_PATTERNS: [RegExp, (match: RegExpExecArray) => string][] = [
-  [/^Purchase order #\S+ is (\w+) and cannot be moved to (\w+)/, (m) => `La orden está ${m[1]} y no puede pasar a ${m[2]}`],
-  [/^Purchase order #\S+ already has a payable/, () => "La orden ya tiene una cuenta por pagar"],
-  [/^Product #(\d+) not found or inactive/, (m) => `El producto #${m[1]} no existe o está inactivo`],
-  [/^(\w[\w ]*) with id: #\S+ not found/, () => "El registro no existe"],
-  [/^Credit #\S+ is already paid off/, () => "El crédito ya está pagado"],
-  [/^Expense #\S+ is already paid/, () => "El gasto ya está pagado"],
-  [/^Recipe #\S+ \((.+)\) is inactive/, (m) => `El producto ${m[1]} está inactivo`],
-  [/^The supplies of sale #\S+ were already discounted/, () => "Los insumos de esta venta ya se descontaron"],
-  [/^The period (\S+) is closed; reopen it/, (m) => `El periodo ${m[1]} está cerrado: reábrelo para registrar movimientos`],
-  [/^The period (\S+) is not closed/, (m) => `El periodo ${m[1]} no está cerrado`],
-  [/^The period (\S+) has not started yet/, (m) => `El periodo ${m[1]} aún no ha empezado`],
-  [/^The period (\S+) is already closed/, (m) => `El periodo ${m[1]} ya está cerrado`],
-  [/^The prepayment \((\d+)\) is greater than the principal \((\d+)\)/, (m) => `El abono (${m[1]}) supera el saldo de capital (${m[2]})`],
-  [/is not available/, () => "El servicio no está disponible, intenta de nuevo en un momento"],
-]
-
-function translateOperations(message: string): string {
-  if (OPERATION_MESSAGES[message]) return OPERATION_MESSAGES[message]
-  for (const [pattern, toSpanish] of OPERATION_PATTERNS) {
-    const match = pattern.exec(message)
-    if (match) return toSpanish(match)
-  }
-  return message
 }
 
 type Query = Record<string, string | number | boolean | undefined | null>
@@ -117,7 +60,7 @@ export async function apiFetch<T>(
     // The gateway sends message as a string (gRPC errors) or a string[] (validation)
     const message = (data as { message?: string | string[] } | null)?.message
     const messages = Array.isArray(message) ? message : [message ?? "Ocurrió un error inesperado"]
-    throw new ApiError(response.status, messages.map(translate))
+    throw new ApiError(response.status, messages.map((message) => translate(message, response.status)))
   }
   return data as T
 }

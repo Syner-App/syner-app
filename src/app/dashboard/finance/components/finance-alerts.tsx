@@ -1,7 +1,7 @@
 import { ArrowRight, CircleAlert } from "lucide-react"
 import Link from "next/link"
 
-import { translate } from "@/lib/api-client"
+import { translate } from "@/lib/messages"
 import type { FinanceAlert } from "@/app/dashboard/finance/utils/types"
 
 // Without assumptions there is no break-even yet: a setup step, not a business warning

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select"
 import { errorMessage } from "@/lib/api-client"
 import { currentPeriod, formatDate, formatMoney } from "@/lib/format"
+import { translate } from "@/lib/messages"
 import { PeriodSelect } from "@/app/dashboard/finance/components/period-select"
 import { useRetrySaleStock } from "@/app/dashboard/finance/hooks/useFinanceMutations"
 import { useSales } from "@/app/dashboard/finance/hooks/useFinanceQueries"
@@ -41,7 +42,7 @@ const STOCK_VARIANTS: Record<StockDeductionStatus, "secondary" | "outline" | "de
 
 function StockBadge({ sale }: { sale: Sale }) {
   return (
-    <Badge variant={STOCK_VARIANTS[sale.estado_stock]} title={sale.motivo_rechazo}>
+    <Badge variant={STOCK_VARIANTS[sale.estado_stock]} title={sale.motivo_rechazo && translate(sale.motivo_rechazo)}>
       {sale.estado_stock === "STOCK_PENDIENTE" && <Loader2 className="animate-spin" />}
       {STOCK_STATUS_LABELS[sale.estado_stock]}
     </Badge>
@@ -87,7 +88,7 @@ export function SalesView() {
           <span className="truncate" title={summary(sale)}>
             {summary(sale)}
           </span>
-          {sale.motivo_rechazo && <span className="truncate text-xs text-destructive">{sale.motivo_rechazo}</span>}
+          {sale.motivo_rechazo && <span className="truncate text-xs text-destructive">{translate(sale.motivo_rechazo)}</span>}
         </div>
       ),
     },
@@ -157,7 +158,7 @@ export function SalesView() {
               <p className="text-sm">{summary(sale)}</p>
               <CardField label="Fecha">{formatDate(sale.fecha)}</CardField>
               <CardField label="Cuenta">{ACCOUNT_LABELS[sale.cuenta]}</CardField>
-              {sale.motivo_rechazo && <p className="text-xs text-destructive">{sale.motivo_rechazo}</p>}
+              {sale.motivo_rechazo && <p className="text-xs text-destructive">{translate(sale.motivo_rechazo)}</p>}
             </>
           )}
         />
