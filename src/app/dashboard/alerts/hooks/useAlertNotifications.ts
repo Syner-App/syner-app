@@ -10,6 +10,13 @@ import { getNotificationTicketAction } from "@/app/dashboard/alerts/actions/getN
 import { ALERTS_KEY } from "@/app/dashboard/alerts/hooks/useAlerts"
 import type { Alert } from "@/app/dashboard/alerts/utils/types"
 import { PRODUCTS_KEY } from "@/app/dashboard/products/hooks/useProducts"
+import {
+  LATEST_PURCHASE_ORDER_KEY,
+  PURCHASE_ORDERS_KEY,
+} from "@/app/dashboard/purchase-orders/hooks/usePurchaseOrders"
+import { markOrderGenerating } from "@/app/dashboard/purchase-orders/utils/order-generation"
+import type { PurchaseOrder } from "@/app/dashboard/purchase-orders/utils/types"
+import type { Paginated } from "@/lib/types"
 
 const GATEWAY_WS_URL = process.env.NEXT_PUBLIC_GATEWAY_WS_URL ?? "http://localhost:3000"
 
@@ -49,6 +56,12 @@ export function useAlertNotifications(organizationId: string | undefined) {
         action: { label: "Ver", onClick: openAlerts },
       })
       refresh()
+      // orders-ms opens a purchase order for low stock alerts (sidebar spinner meanwhile)
+      if (alert.tipo === "STOCK_BAJO") {
+        const latest = queryClient.getQueryData<Paginated<PurchaseOrder>>(LATEST_PURCHASE_ORDER_KEY)
+        markOrderGenerating(latest?.data[0]?.id)
+        void queryClient.invalidateQueries({ queryKey: PURCHASE_ORDERS_KEY })
+      }
     })
 
     socket.on("alert:resolved", (alert: Alert) => {

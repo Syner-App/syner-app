@@ -1,5 +1,6 @@
 "use client"
 
+import { Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -28,7 +29,15 @@ export function NavMain({ groups }: { groups: NavGroup[] }) {
             <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
               <Link href={item.url} onClick={() => isMobile && setOpenMobile(false)}>
                 {item.icon}
-                <span>{item.title}</span>
+                {item.loading ? (
+                  // size-3.5 matches the text-sm label; ! beats the button's [&_svg]:size-4
+                  <span className="flex items-center gap-1.5">
+                    {item.title}
+                    <Loader2 className="size-3.5! animate-spin" aria-label="Generando orden de compra" />
+                  </span>
+                ) : (
+                  <span>{item.title}</span>
+                )}
               </Link>
             </SidebarMenuButton>
             {item.badge ? (

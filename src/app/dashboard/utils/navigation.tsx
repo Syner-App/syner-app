@@ -25,6 +25,8 @@ export interface NavItem {
   icon: React.ReactNode
   // Count shown next to the item (active alerts)
   badge?: number
+  // Spinner next to the title (purchase order being generated)
+  loading?: boolean
 }
 
 export interface NavGroup {

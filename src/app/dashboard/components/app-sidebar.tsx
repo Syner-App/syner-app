@@ -16,8 +16,10 @@ import { NavUser } from "@/app/dashboard/components/nav-user"
 import { TeamSwitcher } from "@/app/dashboard/components/team-switcher"
 import { navigationFor, type NavGroup } from "@/app/dashboard/utils/navigation"
 import { useActiveAlertsCount } from "@/app/dashboard/alerts/hooks/useAlerts"
+import { useIsGeneratingOrder } from "@/app/dashboard/purchase-orders/hooks/usePurchaseOrders"
 
 const ALERTS_URL = "/dashboard/alerts"
+const PURCHASE_ORDERS_URL = "/dashboard/purchase-orders"
 
 function withAlertsBadge(groups: NavGroup[], count: number | undefined): NavGroup[] {
   return groups.map((group) => ({
@@ -26,9 +28,18 @@ function withAlertsBadge(groups: NavGroup[], count: number | undefined): NavGrou
   }))
 }
 
+function withOrdersLoading(groups: NavGroup[], loading: boolean): NavGroup[] {
+  return groups.map((group) => ({
+    ...group,
+    items: group.items.map((item) => (item.url === PURCHASE_ORDERS_URL ? { ...item, loading } : item)),
+  }))
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession()
-  const { data: activeAlerts } = useActiveAlertsCount(Boolean(session?.user.organization_id))
+  const hasOrganization = Boolean(session?.user.organization_id)
+  const { data: activeAlerts } = useActiveAlertsCount(hasOrganization)
+  const generatingOrder = useIsGeneratingOrder(hasOrganization)
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -36,7 +47,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {session ? <TeamSwitcher session={session} /> : <Skeleton className="h-12 w-full" />}
       </SidebarHeader>
       <SidebarContent>
-        {session && <NavMain groups={withAlertsBadge(navigationFor(session.user), activeAlerts)} />}
+        {session && (
+          <NavMain
+            groups={withOrdersLoading(withAlertsBadge(navigationFor(session.user), activeAlerts), generatingOrder)}
+          />
+        )}
       </SidebarContent>
       <SidebarFooter>
         {session ? <NavUser user={session.user} /> : <Skeleton className="h-12 w-full" />}
