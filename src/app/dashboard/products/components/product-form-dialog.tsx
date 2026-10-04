@@ -60,8 +60,8 @@ export function ProductFormDialog({
           codigo_sku: "",
           categoria: undefined,
           precio: NaN,
-          stock_actual: 0,
-          stock_minimo: 0,
+          stock_actual: NaN,
+          stock_minimo: NaN,
           proveedor: "",
         },
   })

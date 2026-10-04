@@ -1,9 +1,10 @@
 "use client"
 
-import { Loader2, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import { Loader2, Minus, Plus, Search, ShoppingBag, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
+import { NumberInput } from "@/components/number-input"
 import { PageHeader } from "@/components/page-header"
 import {
   ResponsiveDialog,
@@ -28,30 +29,48 @@ import { useRegisterSale } from "@/app/dashboard/finance/hooks/useFinanceMutatio
 import { useRecipes } from "@/app/dashboard/finance/hooks/useFinanceQueries"
 import { ACCOUNT_LABELS, CASH_ACCOUNTS, type CashAccount, type Recipe } from "@/app/dashboard/finance/utils/types"
 
-// Point of sale: tap a recipe to add a unit, then charge. Built for a phone at the counter;
-// the cart bar stays at the bottom of the screen
+// Accent- and case-insensitive text for the search ("Limón" matches "limon")
+const searchable = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+
+// Point of sale: tap a recipe to add a unit (or type the quantity), then charge. Built for a
+// phone at the counter; the cart bar stays at the bottom of the screen
 export function SalePos() {
   const { data: session } = useSession()
   const recipes = useRecipes()
   const registerSale = useRegisterSale()
 
+  // recipe id -> units; NaN while the quantity input is being typed (empty)
   const [cart, setCart] = useState<Record<number, number>>({})
   const [checkout, setCheckout] = useState(false)
   const [cuenta, setCuenta] = useState<CashAccount>("CAJA")
-  const [fecha, setFecha] = useState("")
+  const [fecha, setFecha] = useState(today)
+  const [search, setSearch] = useState("")
 
   const active = recipes.data?.data.filter((recipe) => recipe.activo) ?? []
+  // The cart is computed over every active recipe: filtering never drops a line
+  const query = searchable(search.trim())
+  const shown = query ? active.filter((recipe) => searchable(recipe.nombre).includes(query)) : active
   const lines = active
     .filter((recipe) => (cart[recipe.id] ?? 0) > 0)
     .map((recipe) => ({ recipe, unidades: cart[recipe.id] }))
   const units = lines.reduce((sum, line) => sum + line.unidades, 0)
   const total = lines.reduce((sum, line) => sum + line.unidades * line.recipe.precio_venta, 0)
 
-  function change(recipe: Recipe, delta: number) {
+  function setQuantity(recipe: Recipe, quantity: number) {
     setCart((current) => {
-      const next = Math.max(0, (current[recipe.id] ?? 0) + delta)
-      return { ...current, [recipe.id]: next }
+      // Keep NaN (empty input) so the input stays while typing; 0 removes the line
+      const next = { ...current, [recipe.id]: quantity }
+      if (quantity === 0) delete next[recipe.id]
+      return next
     })
+  }
+
+  function change(recipe: Recipe, delta: number) {
+    setQuantity(recipe, Math.max(0, (cart[recipe.id] || 0) + delta))
   }
 
   async function charge() {
@@ -62,7 +81,7 @@ export function SalePos() {
         lineas: lines.map(({ recipe, unidades }) => ({ recipe_id: recipe.id, unidades })),
       })
       setCart({})
-      setFecha("")
+      setFecha(today())
       setCheckout(false)
     } catch {
       // Shown in the checkout dialog
@@ -79,18 +98,33 @@ export function SalePos() {
         </p>
       )}
 
+      {active.length > 0 && (
+        <div className="relative w-full md:w-72">
+          <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            aria-label="Buscar producto"
+            placeholder="Buscar producto…"
+            className="pl-8"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {recipes.isPending &&
           Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-32 rounded-xl" />)}
-        {active.map((recipe) => {
-          const quantity = cart[recipe.id] ?? 0
+        {shown.map((recipe) => {
+          const quantity = cart[recipe.id]
+          const inCart = quantity !== undefined
           return (
             <Card
               key={recipe.id}
               size="sm"
               className={cn(
                 "relative gap-2 px-3 transition-colors select-none",
-                quantity > 0 && "ring-2 ring-primary"
+                inCart && "ring-2 ring-primary"
               )}
             >
               <button
@@ -102,7 +136,7 @@ export function SalePos() {
                 <span className="text-muted-foreground tabular-nums">{formatMoney(recipe.precio_venta)}</span>
               </button>
               <div className="relative z-10 flex items-center justify-between">
-                {quantity > 0 ? (
+                {inCart ? (
                   <>
                     <Button
                       size="icon"
@@ -112,7 +146,18 @@ export function SalePos() {
                     >
                       <Minus />
                     </Button>
-                    <span className="text-lg font-semibold tabular-nums">{quantity}</span>
+                    <NumberInput
+                      aria-label={`Cantidad de ${recipe.nombre}`}
+                      min={0}
+                      step={1}
+                      className="h-9 w-14 text-center text-lg font-semibold tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      value={quantity}
+                      onChange={(value) => setQuantity(recipe, Number.isNaN(value) ? NaN : Math.max(0, Math.floor(value)))}
+                      // Left empty: the line goes away
+                      onBlur={() => {
+                        if (!(quantity > 0)) setQuantity(recipe, 0)
+                      }}
+                    />
                     <Button size="icon" aria-label={`Agregar una unidad de ${recipe.nombre}`} onClick={() => change(recipe, 1)}>
                       <Plus />
                     </Button>
@@ -125,6 +170,12 @@ export function SalePos() {
           )
         })}
       </div>
+
+      {active.length > 0 && shown.length === 0 && (
+        <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+          Ningún producto coincide con “{search.trim()}”.
+        </p>
+      )}
 
       {recipes.data && active.length === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -188,7 +239,7 @@ export function SalePos() {
             </Tabs>
           </Field>
           <Field>
-            <FieldLabel htmlFor="sale-fecha">Fecha (opcional)</FieldLabel>
+            <FieldLabel htmlFor="sale-fecha">Fecha</FieldLabel>
             <Input id="sale-fecha" type="date" max={today()} value={fecha} onChange={(event) => setFecha(event.target.value)} />
           </Field>
           {registerSale.isError && <FieldError>{errorMessage(registerSale.error)}</FieldError>}

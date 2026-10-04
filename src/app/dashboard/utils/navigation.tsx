@@ -37,7 +37,7 @@ export interface NavGroup {
 // Breadcrumb titles by route
 export const ROUTE_TITLES: Record<string, string> = {
   "/dashboard": "Panel",
-  "/dashboard/products": "Productos",
+  "/dashboard/products": "Productos e insumos",
   "/dashboard/alerts": "Alertas",
   "/dashboard/purchase-orders": "Órdenes de compra",
   "/dashboard/sell": "Registrar venta",
@@ -63,7 +63,7 @@ export function navigationFor(user: User): NavGroup[] {
       label: "Inventario",
       items: [
         { title: "Panel", url: "/dashboard", icon: <LayoutDashboard /> },
-        { title: "Productos", url: "/dashboard/products", icon: <Package /> },
+        { title: "Stock", url: "/dashboard/products", icon: <Package /> },
         { title: "Órdenes de compra", url: "/dashboard/purchase-orders", icon: <ShoppingCart /> },
         { title: "Alertas", url: "/dashboard/alerts", icon: <Bell /> },
       ],

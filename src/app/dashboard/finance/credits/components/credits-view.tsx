@@ -1,23 +1,38 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Banknote, CreditCard, Plus, Zap } from "lucide-react"
+import { Banknote, CreditCard, MoreHorizontal, Pencil, Plus, Trash2, Zap } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { DateField, FormDialog, MoneyField, NumberField, SelectField, TextField } from "@/components/form-fields"
 import { PageHeader } from "@/components/page-header"
 import { CardField } from "@/components/responsive-list"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/hooks/use-session"
 import { errorMessage } from "@/lib/api-client"
 import { formatMoney, today } from "@/lib/format"
 import { can } from "@/lib/permissions"
-import { useCreateCredit, usePayInstallment, usePrepayCredit } from "@/app/dashboard/finance/hooks/useFinanceMutations"
+import {
+  useCreateCredit,
+  useDeleteCredit,
+  usePayInstallment,
+  usePrepayCredit,
+  useUpdateCredit,
+} from "@/app/dashboard/finance/hooks/useFinanceMutations"
 import { useCredits, useWaterfall } from "@/app/dashboard/finance/hooks/useFinanceQueries"
 import { accountOptions, type Credit } from "@/app/dashboard/finance/utils/types"
 import {
@@ -29,18 +44,38 @@ import {
   type PrepaymentValues,
 } from "@/app/dashboard/finance/validations/credit"
 
-type DialogState = { type: "create" } | { type: "installment" | "prepay"; credit: Credit } | null
+type DialogState = { type: "create" } | { type: "edit" | "delete" | "installment" | "prepay"; credit: Credit } | null
 
-function CreateCreditDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+// Creates a credit or, with `credit`, corrects its data (the payments already made are kept)
+function CreditFormDialog({
+  open,
+  credit,
+  onOpenChange,
+}: {
+  open: boolean
+  credit?: Credit
+  onOpenChange: (open: boolean) => void
+}) {
   const create = useCreateCredit()
+  const update = useUpdateCredit()
+  const mutation = credit ? update : create
   const form = useForm<CreditValues>({
     resolver: zodResolver(creditSchema),
-    defaultValues: { nombre: "", saldo_capital: NaN, cuota_mensual: NaN, cuota_asignada: NaN, dia_pago: NaN },
+    defaultValues: credit
+      ? {
+          nombre: credit.nombre,
+          saldo_capital: credit.saldo_capital,
+          cuota_mensual: credit.cuota_mensual,
+          cuota_asignada: credit.cuota_asignada,
+          dia_pago: credit.dia_pago,
+        }
+      : { nombre: "", saldo_capital: NaN, cuota_mensual: NaN, cuota_asignada: NaN, dia_pago: NaN },
   })
 
   async function onSubmit(values: CreditValues) {
     try {
-      await create.mutateAsync(values)
+      if (credit) await update.mutateAsync({ id: credit.id, values })
+      else await create.mutateAsync(values)
       onOpenChange(false)
     } catch {
       // Shown in the dialog
@@ -51,12 +86,12 @@ function CreateCreditDialog({ open, onOpenChange }: { open: boolean; onOpenChang
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Nuevo crédito"
+      title={credit ? "Editar crédito" : "Nuevo crédito"}
       description="La cuota asignada es la parte de la cuota que paga el negocio."
       onSubmit={form.handleSubmit(onSubmit)}
       isSubmitting={form.formState.isSubmitting}
-      error={create.error}
-      submitLabel="Crear crédito"
+      error={mutation.error}
+      submitLabel={credit ? "Guardar cambios" : "Crear crédito"}
     >
       <TextField control={form.control} name="nombre" label="Nombre" placeholder="Crédito de libre inversión" className="sm:col-span-2" />
       <MoneyField control={form.control} name="saldo_capital" label="Saldo de capital" />
@@ -155,18 +190,45 @@ function PrepayDialog({ credit, onOpenChange }: { credit?: Credit; onOpenChange:
   )
 }
 
+function DeleteCreditDialog({ credit, onOpenChange }: { credit?: Credit; onOpenChange: (open: boolean) => void }) {
+  const deleteCredit = useDeleteCredit()
+
+  return (
+    <ConfirmDialog
+      open={credit !== undefined}
+      title={`¿Eliminar ${credit?.nombre ?? "el crédito"}?`}
+      description="Dejará de aparecer en créditos y en el cálculo de cuotas. Las cuotas y abonos ya pagados se conservan en los movimientos."
+      confirmLabel="Eliminar"
+      isPending={deleteCredit.isPending}
+      onConfirm={() => {
+        if (!credit) return Promise.resolve()
+        return deleteCredit.mutateAsync(credit.id).catch((error: unknown) => {
+          toast.error(errorMessage(error))
+          throw error
+        })
+      }}
+      onOpenChange={onOpenChange}
+    />
+  )
+}
+
 function CreditCardItem({
   credit,
-  canPrepay,
+  canManage,
   prepayBlocked,
   onInstallment,
   onPrepay,
+  onEdit,
+  onDelete,
 }: {
   credit: Credit
-  canPrepay: boolean
+  // Owner only: prepay, edit and delete
+  canManage: boolean
   prepayBlocked: boolean
   onInstallment: () => void
   onPrepay: () => void
+  onEdit: () => void
+  onDelete: () => void
 }) {
   const paid = credit.cuota_asignada > 0 ? Math.min(100, (credit.cuota_pagada_periodo / credit.cuota_asignada) * 100) : 100
   return (
@@ -177,7 +239,29 @@ function CreditCardItem({
           {credit.nombre}
         </CardTitle>
         <CardDescription>Paga el día {credit.dia_pago} de cada mes</CardDescription>
-        <CardAction>{credit.activo ? <Badge variant="secondary">Activo</Badge> : <Badge variant="outline">Pagado</Badge>}</CardAction>
+        <CardAction className="flex items-center gap-1">
+          {credit.activo ? <Badge variant="secondary">Activo</Badge> : <Badge variant="outline">Pagado</Badge>}
+          {canManage && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label={`Acciones de ${credit.nombre}`}>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil />
+                  Editar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={onDelete}>
+                  <Trash2 />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         <div className="text-2xl font-semibold tabular-nums">{formatMoney(credit.saldo_capital)}</div>
@@ -200,7 +284,7 @@ function CreditCardItem({
             <Banknote />
             Pagar cuota
           </Button>
-          {canPrepay && (
+          {canManage && (
             <Button
               variant="outline"
               disabled={prepayBlocked}
@@ -251,10 +335,12 @@ export function CreditsView() {
           <CreditCardItem
             key={credit.id}
             credit={credit}
-            canPrepay={isOwner}
+            canManage={isOwner}
             prepayBlocked={waterfall.data ? !waterfall.data.abono_permitido : false}
             onInstallment={() => setDialog({ type: "installment", credit })}
             onPrepay={() => setDialog({ type: "prepay", credit })}
+            onEdit={() => setDialog({ type: "edit", credit })}
+            onDelete={() => setDialog({ type: "delete", credit })}
           />
         ))}
       </div>
@@ -265,7 +351,16 @@ export function CreditsView() {
       )}
 
       {isOwner && (
-        <CreateCreditDialog key={`create-${dialog?.type === "create"}`} open={dialog?.type === "create"} onOpenChange={close} />
+        <>
+          <CreditFormDialog key={`create-${dialog?.type === "create"}`} open={dialog?.type === "create"} onOpenChange={close} />
+          <CreditFormDialog
+            key={dialog?.type === "edit" ? dialog.credit.id : "edit"}
+            open={dialog?.type === "edit"}
+            credit={dialog?.type === "edit" ? dialog.credit : undefined}
+            onOpenChange={close}
+          />
+          <DeleteCreditDialog credit={dialog?.type === "delete" ? dialog.credit : undefined} onOpenChange={close} />
+        </>
       )}
       <InstallmentDialog
         key={dialog?.type === "installment" ? dialog.credit.id : "installment"}

@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { closePeriodAction } from "@/app/dashboard/finance/actions/closePeriodAction"
 import { createCreditAction } from "@/app/dashboard/finance/actions/createCreditAction"
 import { createRecipeAction } from "@/app/dashboard/finance/actions/createRecipeAction"
+import { deleteCreditAction } from "@/app/dashboard/finance/actions/deleteCreditAction"
 import { payExpenseAction } from "@/app/dashboard/finance/actions/payExpenseAction"
 import { payInstallmentAction } from "@/app/dashboard/finance/actions/payInstallmentAction"
 import { payPayableAction } from "@/app/dashboard/finance/actions/payPayableAction"
@@ -18,6 +19,7 @@ import { reopenPeriodAction } from "@/app/dashboard/finance/actions/reopenPeriod
 import { retrySaleStockAction } from "@/app/dashboard/finance/actions/retrySaleStockAction"
 import { setAssumptionsAction } from "@/app/dashboard/finance/actions/setAssumptionsAction"
 import { transferReserveAction } from "@/app/dashboard/finance/actions/transferReserveAction"
+import { updateCreditAction } from "@/app/dashboard/finance/actions/updateCreditAction"
 import { updatePolicyAction } from "@/app/dashboard/finance/actions/updatePolicyAction"
 import { updateRecipeAction } from "@/app/dashboard/finance/actions/updateRecipeAction"
 import { upsertSupplyAction } from "@/app/dashboard/finance/actions/upsertSupplyAction"
@@ -63,6 +65,11 @@ export const useUpdateRecipe = () =>
 export const usePayPayable = () => useFinanceMutation(payPayableAction, () => "Cuenta pagada")
 
 export const useCreateCredit = () => useFinanceMutation(createCreditAction, (credit) => `Crédito ${credit.nombre} creado`)
+
+export const useUpdateCredit = () =>
+  useFinanceMutation(updateCreditAction, (credit) => `Crédito ${credit.nombre} actualizado`)
+
+export const useDeleteCredit = () => useFinanceMutation(deleteCreditAction, (credit) => `Crédito ${credit.nombre} eliminado`)
 
 export const usePayInstallment = () => useFinanceMutation(payInstallmentAction, () => "Cuota registrada")
 

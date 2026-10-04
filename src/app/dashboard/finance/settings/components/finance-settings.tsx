@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/hooks/use-session"
 import { errorMessage } from "@/lib/api-client"
-import { formatMoney, formatPeriod, recentPeriods } from "@/lib/format"
+import { formatMoney, formatPeriod, recentPeriods, today } from "@/lib/format"
 import { can } from "@/lib/permissions"
 import { PeriodSelect } from "@/app/dashboard/finance/components/period-select"
 import {
@@ -48,15 +48,15 @@ function AssumptionsForm({ assumptions }: { assumptions: Assumptions | null }) {
   const form = useForm<AssumptionsValues>({
     resolver: zodResolver(assumptionsSchema),
     defaultValues: {
-      vigente_desde: "",
+      vigente_desde: today(),
       precio_promedio: assumptions?.precio_promedio ?? NaN,
       costo_variable_unitario: assumptions?.costo_variable_unitario ?? NaN,
-      arriendo: assumptions?.arriendo ?? 0,
-      servicios: assumptions?.servicios ?? 0,
-      salarios: assumptions?.salarios ?? 0,
-      otros_fijos: assumptions?.otros_fijos ?? 0,
+      arriendo: assumptions?.arriendo ?? NaN,
+      servicios: assumptions?.servicios ?? NaN,
+      salarios: assumptions?.salarios ?? NaN,
+      otros_fijos: assumptions?.otros_fijos ?? NaN,
       dias_operacion: assumptions?.dias_operacion ?? 26,
-      inversion_inicial: assumptions?.inversion_inicial ?? 0,
+      inversion_inicial: assumptions?.inversion_inicial ?? NaN,
     },
   })
 
@@ -95,7 +95,7 @@ function AssumptionsForm({ assumptions }: { assumptions: Assumptions | null }) {
             <MoneyField control={form.control} name="salarios" label="Salarios" />
             <MoneyField control={form.control} name="otros_fijos" label="Otros fijos" />
             <MoneyField control={form.control} name="inversion_inicial" label="Inversión inicial" />
-            <DateField control={form.control} name="vigente_desde" label="Vigentes desde" description="Vacío: hoy." />
+            <DateField control={form.control} name="vigente_desde" label="Vigentes desde" />
           </FieldGroup>
           {save.isError && <FieldError className="mt-4">{errorMessage(save.error)}</FieldError>}
         </CardContent>

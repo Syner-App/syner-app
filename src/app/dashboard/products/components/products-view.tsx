@@ -64,8 +64,8 @@ export function ProductsView() {
   return (
     <>
       <PageHeader
-        title="Productos"
-        description="Inventario de la organización: precios, stock y proveedores."
+        title="Productos e insumos"
+        description="Stock de la organización: precios, existencias y proveedores. Es el stock que usan las recetas e insumos."
         actions={
           canManage && (
             <Button onClick={() => setDialog({ type: "create" })}>
